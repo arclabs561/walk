@@ -1,6 +1,6 @@
 //! # walk
 //!
-//! Graph random-walk family primitives for Tekne.
+//! Graph random-walk family primitives for the representational stack.
 
 pub mod graph;
 pub mod pagerank;
