@@ -16,7 +16,8 @@ use rand::SeedableRng;
 use rand::Rng;
 use rand_chacha::ChaCha8Rng;
 
-use walk::{personalized_pagerank, PageRankConfig};
+use walk::{personalized_pagerank, Graph, PageRankConfig};
+use std::path::Path;
 
 #[derive(Debug, Clone)]
 struct Adj {
@@ -45,6 +46,58 @@ impl Adj {
         }
         Self { adj }
     }
+
+    /// Load an undirected edge list (two whitespace-separated node ids per line).
+    ///
+    /// Lines starting with `#` are ignored.
+    fn from_undirected_edgelist(path: &Path) -> Result<Self, String> {
+        let txt = std::fs::read_to_string(path)
+            .map_err(|e| format!("failed to read {}: {e}", path.display()))?;
+
+        let mut edges: Vec<(usize, usize)> = Vec::new();
+        let mut max_node = 0usize;
+
+        for (line_no, line) in txt.lines().enumerate() {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+            let mut it = line.split_whitespace();
+            let a = it
+                .next()
+                .ok_or_else(|| format!("line {}: missing src", line_no + 1))?;
+            let b = it
+                .next()
+                .ok_or_else(|| format!("line {}: missing dst", line_no + 1))?;
+            let u: usize = a
+                .parse()
+                .map_err(|e| format!("line {}: bad src '{a}': {e}", line_no + 1))?;
+            let v: usize = b
+                .parse()
+                .map_err(|e| format!("line {}: bad dst '{b}': {e}", line_no + 1))?;
+            max_node = max_node.max(u).max(v);
+            edges.push((u, v));
+        }
+
+        let n = max_node + 1;
+        if n == 0 {
+            return Err("edgelist produced empty graph".to_string());
+        }
+
+        let mut adj = vec![Vec::new(); n];
+        for (u, v) in edges {
+            if u == v {
+                continue;
+            }
+            adj[u].push(v);
+            adj[v].push(u);
+        }
+        for nbrs in &mut adj {
+            nbrs.sort_unstable();
+            nbrs.dedup();
+        }
+        Ok(Self { adj })
+    }
 }
 
 impl walk::Graph for Adj {
@@ -60,11 +113,20 @@ impl walk::Graph for Adj {
 }
 
 fn main() {
-    // A “not tiny” graph, but still cheap to run locally.
-    let n = 500usize;
-    let g = Adj::sbm_two_block(n, 0.02, 0.002, 123);
+    // If you have a real graph, point to it:
+    //
+    // WALK_EDGELIST=/path/to/edges.txt cargo run --example ppr_hard_pool
+    //
+    // Format: two whitespace-separated integer node ids per line, undirected.
+    let g = if let Ok(path) = std::env::var("WALK_EDGELIST") {
+        Adj::from_undirected_edgelist(Path::new(&path)).expect("failed to load WALK_EDGELIST")
+    } else {
+        // Otherwise, use a seeded SBM graph (realistic topology, deterministic).
+        Adj::sbm_two_block(500, 0.02, 0.002, 123)
+    };
+    let n = g.node_count();
 
-    let head = 7usize;
+    let head = 7usize.min(n.saturating_sub(1));
     let mut p = vec![0.0f64; n];
     p[head] = 1.0;
 
