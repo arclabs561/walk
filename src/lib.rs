@@ -46,10 +46,12 @@ pub use random_walk::{
     generate_biased_walks_from_nodes,
     generate_biased_walks_ref,
     generate_biased_walks_ref_from_nodes,
+    generate_biased_walks_ref_streaming_from_nodes,
     generate_walks,
     generate_walks_from_nodes,
     generate_walks_ref,
     generate_walks_ref_from_nodes,
+    generate_walks_ref_streaming_from_nodes,
     WalkConfig,
 };
 
