@@ -14,9 +14,10 @@
 //!
 //! - Page et al. (1999): PageRank.
 //! - Grover & Leskovec (2016): Node2Vec (biased second-order random walks).
-//! - Node2Vec+ (exact citation to confirm; common name for the “accurately modeling biased walks”
-//!   extension). The `WeightedNode2VecPlusConfig` path is intended to keep the interface explicit
-//!   about the additional terms.
+//! - Liu, Hirn, Krishnan (2023): Node2Vec+ for weighted networks (*Accurately modeling biased
+//!   random walks on weighted networks using node2vec+*, Bioinformatics 39(1): btad047).
+//!   The `WeightedNode2VecPlusConfig` path is intended to keep the interface explicit about the
+//!   additional terms.
 //! - Alias sampling method: Walker (1974) / Vose (1991) style alias tables for O(1) categorical draws.
 
 pub mod graph;
