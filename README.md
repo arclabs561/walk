@@ -21,6 +21,11 @@ walk generation is intended to be reproducible.
 This crate uses `kuji` for reservoir sampling via `sample_start_nodes_reservoir`, which is useful
 when `node_count` is too large to materialize `0..node_count` just to choose a subset of starts.
 
+## Examples
+
+- `cargo run --example ppr_hard_pool`: generate a seeded SBM graph, compute PPR from an anchor,
+  then sample a stochastic top-\(k\) candidate pool using Gumbel-top-k on \(\log(\mathrm{PPR})\).
+
 ## References (starting points)
 
 - Page et al. (1999): PageRank.
