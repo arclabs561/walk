@@ -10,11 +10,6 @@ repository = "https://github.com/arclabs561/walk"
 homepage = "https://github.com/arclabs561/walk"
 documentation = "https://docs.rs/walk"
 
-[workspace]
-
-[workspace.dependencies]
-proptest = "1.9"
-
 [dependencies]
 serde = { version = "1.0", features = ["derive"], optional = true }
 rand = "0.8"
@@ -32,4 +27,4 @@ parallel = ["dep:rayon"]
 petgraph = ["dep:petgraph"]
 
 [dev-dependencies]
-proptest = { workspace = true }
+proptest = "1.9"
