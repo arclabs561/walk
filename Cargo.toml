@@ -6,6 +6,9 @@ rust-version = "1.75"
 authors = ["Arc"]
 license = "MIT OR Apache-2.0"
 description = "Graph random-walk family primitives: PageRank, Personalized PageRank, and random walk generation."
+repository = "https://github.com/arclabs561/walk"
+homepage = "https://github.com/arclabs561/walk"
+documentation = "https://docs.rs/walk"
 
 [dependencies]
 serde = { workspace = true, optional = true }
