@@ -121,8 +121,14 @@ fn main() {
     let g = if let Ok(path) = std::env::var("WALK_EDGELIST") {
         Adj::from_undirected_edgelist(Path::new(&path)).expect("failed to load WALK_EDGELIST")
     } else {
-        // Otherwise, use a seeded SBM graph (realistic topology, deterministic).
-        Adj::sbm_two_block(500, 0.02, 0.002, 123)
+        // Prefer a small real graph if present in-repo.
+        let karate = Path::new(env!("CARGO_MANIFEST_DIR")).join("testdata/karate_club.edgelist");
+        if karate.exists() {
+            Adj::from_undirected_edgelist(&karate).expect("failed to load testdata/karate_club.edgelist")
+        } else {
+            // Otherwise, use a seeded SBM graph (realistic topology, deterministic).
+            Adj::sbm_two_block(500, 0.02, 0.002, 123)
+        }
     };
     let n = g.node_count();
 
