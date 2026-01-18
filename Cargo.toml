@@ -34,6 +34,7 @@ proptest = "1.9"
 # NOTE: keep this repo standalone-publishable. `workspace = true` would only work
 # inside the super-workspace; it would fail in an isolated GitHub checkout.
 criterion = "0.7"
+stats_alloc = "0.1"
 
 [[bench]]
 name = "walk_ops"
