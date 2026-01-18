@@ -19,6 +19,8 @@ rayon = { version = "1.10", optional = true }
 ordered-float = "4.2"
 thiserror = "2.0"
 petgraph = { version = "0.6", optional = true }
+# NOTE: this is an in-house dependency edge (kuji is the sampling substrate).
+# If/when `walk` must be published standalone, switch this to a crates.io version dep.
 kuji = { path = "../kuji", version = "0.1.0" }
 
 [features]
