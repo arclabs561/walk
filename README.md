@@ -25,6 +25,9 @@ when `node_count` is too large to materialize `0..node_count` just to choose a s
 
 - `cargo run --example ppr_hard_pool`: generate a seeded SBM graph, compute PPR from an anchor,
   then sample a stochastic top-\(k\) candidate pool using Gumbel-top-k on \(\log(\mathrm{PPR})\).
+  - uses `testdata/karate_club.edgelist` by default (small real graph)
+  - set `WALK_DATASET=lesmis` or `WALK_DATASET=florentine` for other bundled graphs
+  - set `WALK_EDGELIST=/path/to/edges.txt` to run on your own graph
 
 ## References (starting points)
 

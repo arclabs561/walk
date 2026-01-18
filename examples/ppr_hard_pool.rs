@@ -121,10 +121,22 @@ fn main() {
     let g = if let Ok(path) = std::env::var("WALK_EDGELIST") {
         Adj::from_undirected_edgelist(Path::new(&path)).expect("failed to load WALK_EDGELIST")
     } else {
-        // Prefer a small real graph if present in-repo.
-        let karate = Path::new(env!("CARGO_MANIFEST_DIR")).join("testdata/karate_club.edgelist");
-        if karate.exists() {
-            Adj::from_undirected_edgelist(&karate).expect("failed to load testdata/karate_club.edgelist")
+        // Prefer a small real graph shipped in-repo.
+        //
+        // WALK_DATASET selects from bundled datasets:
+        // - karate (default)
+        // - lesmis
+        // - florentine
+        let ds = std::env::var("WALK_DATASET").unwrap_or_else(|_| "karate".to_string());
+        let rel = match ds.as_str() {
+            "karate" => "testdata/karate_club.edgelist",
+            "lesmis" => "testdata/les_miserables.edgelist",
+            "florentine" => "testdata/florentine_families.edgelist",
+            other => panic!("unknown WALK_DATASET '{other}' (expected: karate|lesmis|florentine)"),
+        };
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join(rel);
+        if path.exists() {
+            Adj::from_undirected_edgelist(&path).expect("failed to load bundled dataset")
         } else {
             // Otherwise, use a seeded SBM graph (realistic topology, deterministic).
             Adj::sbm_two_block(500, 0.02, 0.002, 123)
@@ -151,7 +163,7 @@ fn main() {
 
     // “Hard pool” size. In practice, you’d pass these candidates into downstream
     // negative sampling (e.g., corrupt tail from this pool).
-    let k = 30usize;
+    let k = 30usize.min(n.max(1));
 
     // Deterministic stochasticity: seeded RNG.
     let mut rng = ChaCha8Rng::seed_from_u64(9);
