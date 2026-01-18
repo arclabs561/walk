@@ -1,17 +1,64 @@
 //! # walk
 //!
-//! Graph random-walk family primitives for the representational stack.
+//! Graph random-walk family primitives: PageRank / personalized PageRank, unbiased random walks,
+//! and biased 2nd-order walks (Node2Vec / Node2Vec+).
+//!
+//! ## Design contract
+//!
+//! - **Algorithmic clarity > cleverness**: implementations are meant to be readable and testable.
+//! - **Determinism is a first-class option**: when a caller supplies an RNG/seed, results should
+//!   be reproducible. (Benchmarks and statistical smoke tests should avoid flakiness.)
+//! - **No backend lock-in**: this crate is about walks and ranks, not tensors.
+//!
+//! ## References (what motivated the implementations/tests)
+//!
+//! - Page et al. (1999): PageRank.
+//! - Grover & Leskovec (2016): Node2Vec (biased second-order random walks).
+//! - Node2Vec+ (exact citation to confirm; common name for the “accurately modeling biased walks”
+//!   extension). The `WeightedNode2VecPlusConfig` path is intended to keep the interface explicit
+//!   about the additional terms.
+//! - Alias sampling method: Walker (1974) / Vose (1991) style alias tables for O(1) categorical draws.
 
 pub mod graph;
+pub mod node2vec;
 pub mod pagerank;
 pub mod ppr;
 pub mod random_walk;
 pub mod topk;
 
-pub use graph::{Graph, WeightedGraph, AdjacencyMatrix};
+pub use graph::{AdjacencyMatrix, Graph, GraphRef, WeightedGraph, WeightedGraphRef};
+pub use node2vec::{
+    generate_biased_walks_precomp_ref,
+    generate_biased_walks_precomp_ref_from_nodes,
+    generate_biased_walks_weighted_ref,
+    generate_biased_walks_weighted_plus_ref,
+    PrecomputedBiasedWalks,
+    WeightedNode2VecPlusConfig,
+};
+
+#[cfg(feature = "parallel")]
+pub use node2vec::generate_biased_walks_precomp_ref_parallel_from_nodes;
 pub use pagerank::{pagerank, PageRankConfig};
 pub use ppr::personalized_pagerank;
-pub use random_walk::{generate_walks, generate_biased_walks, WalkConfig};
+pub use random_walk::{
+    generate_biased_walks,
+    generate_biased_walks_from_nodes,
+    generate_biased_walks_ref,
+    generate_biased_walks_ref_from_nodes,
+    generate_walks,
+    generate_walks_from_nodes,
+    generate_walks_ref,
+    generate_walks_ref_from_nodes,
+    WalkConfig,
+};
+
+#[cfg(feature = "parallel")]
+pub use random_walk::{
+    generate_biased_walks_ref_parallel,
+    generate_biased_walks_ref_parallel_from_nodes,
+    generate_walks_ref_parallel,
+    generate_walks_ref_parallel_from_nodes,
+};
 pub use topk::{top_k, normalize};
 
 #[derive(Debug, thiserror::Error)]
