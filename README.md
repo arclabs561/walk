@@ -18,8 +18,8 @@ walk generation is intended to be reproducible.
 
 ## Sampling integration
 
-This crate uses `kuji` for reservoir sampling via `sample_start_nodes_reservoir`, which is useful
-when `node_count` is too large to materialize `0..node_count` just to choose a subset of starts.
+This crate uses reservoir sampling via `sample_start_nodes_reservoir`, which is useful when
+`node_count` is too large to materialize `0..node_count` just to choose a subset of starts.
 
 ## Examples
 

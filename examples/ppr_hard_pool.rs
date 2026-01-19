@@ -3,7 +3,7 @@
 //! This example is intentionally “graph-only” (no tensors) but tries to exercise
 //! the exact seams we care about:
 //! - `walk::personalized_pagerank` as a cheap locality signal
-//! - `kuji::gumbel_topk_sample_with_rng` as a stochastic top-k without replacement
+//! - Gumbel-top-k sampling as a stochastic top-k without replacement
 //!
 //! A common pattern is “hard negatives from graph locality”:
 //! - define a weight vector \(w\) over nodes (e.g. PPR from an anchor)
@@ -12,12 +12,37 @@
 //! For a single draw (\(k=1\)), Gumbel-max with logits \(\log w_i\) samples
 //! \(i\) with probability \(w_i / \sum_j w_j\).
 
-use rand::SeedableRng;
 use rand::Rng;
+use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 
 use walk::{personalized_pagerank, Graph, PageRankConfig};
 use std::path::Path;
+
+fn gumbel_topk_sample_with_rng(logits: &[f32], k: usize, rng: &mut impl Rng) -> Vec<usize> {
+    if k == 0 || logits.is_empty() {
+        return Vec::new();
+    }
+    let k = k.min(logits.len());
+
+    let mut scored: Vec<(usize, f32)> = Vec::with_capacity(logits.len());
+    for (i, &logit) in logits.iter().enumerate() {
+        // Standard Gumbel noise: g = -ln(-ln(U)).
+        // Clamp U away from {0,1} to avoid infinities.
+        let mut u: f32 = rng.random();
+        if u <= 0.0 {
+            u = f32::MIN_POSITIVE;
+        }
+        if u >= 1.0 {
+            u = 1.0 - f32::EPSILON;
+        }
+        let g = -(-u.ln()).ln();
+        scored.push((i, logit + g));
+    }
+
+    scored.sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+    scored.into_iter().take(k).map(|(i, _)| i).collect()
+}
 
 #[derive(Debug, Clone)]
 struct Adj {
@@ -167,7 +192,7 @@ fn main() {
 
     // Deterministic stochasticity: seeded RNG.
     let mut rng = ChaCha8Rng::seed_from_u64(9);
-    let picked = kuji::gumbel_topk_sample_with_rng(&logits, k, &mut rng);
+    let picked = gumbel_topk_sample_with_rng(&logits, k, &mut rng);
 
     // Show the top-k-by-score (deterministic) and one stochastic top-k draw.
     let mut by_score: Vec<usize> = (0..n).collect();

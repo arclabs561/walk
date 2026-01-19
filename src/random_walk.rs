@@ -1,7 +1,6 @@
 //! Random walk generation.
 
 use crate::graph::{Graph, GraphRef};
-use kuji::reservoir::ReservoirSampler;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
@@ -23,17 +22,29 @@ impl Default for WalkConfig {
 
 /// Deterministically sample up to `k` start nodes from `0..node_count`.
 ///
-/// This is a practical “bridge” between `walk` and the lower-level sampling crate `kuji`:
-/// when `node_count` is huge, materializing all nodes just to choose a subset can be wasteful.
+/// When `node_count` is huge, materializing all nodes just to choose a subset can be wasteful.
 ///
-/// We use reservoir sampling (uniform sample without replacement) to keep memory bounded.
+/// We use reservoir sampling (uniform sample without replacement) to keep memory bounded, while
+/// staying deterministic for a fixed seed.
 pub fn sample_start_nodes_reservoir(node_count: usize, k: usize, seed: u64) -> Vec<usize> {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
-    let mut sampler = ReservoirSampler::new(k);
-    for i in 0..node_count {
-        sampler.add_with_rng(i, &mut rng);
+    if k == 0 || node_count == 0 {
+        return Vec::new();
     }
-    sampler.samples().to_vec()
+    if k >= node_count {
+        return (0..node_count).collect();
+    }
+
+    // Algorithm R (Vitter): uniform sample without replacement.
+    let mut reservoir: Vec<usize> = (0..k).collect();
+    for i in k..node_count {
+        // Draw j uniformly in [0, i].
+        let j = rng.random_range(0..=i);
+        if j < k {
+            reservoir[j] = i;
+        }
+    }
+    reservoir
 }
 
 pub fn generate_walks<G: Graph>(graph: &G, config: WalkConfig) -> Vec<Vec<usize>> {
