@@ -21,6 +21,8 @@
 //! - Alias sampling method: Walker (1974) / Vose (1991) style alias tables for O(1) categorical draws.
 
 pub mod graph;
+#[cfg(feature = "petgraph")]
+pub mod betweenness;
 pub mod node2vec;
 pub mod pagerank;
 pub mod ppr;
@@ -29,6 +31,8 @@ pub mod reachability;
 pub mod topk;
 
 pub use graph::{AdjacencyMatrix, Graph, GraphRef, WeightedGraph, WeightedGraphRef};
+#[cfg(feature = "petgraph")]
+pub use betweenness::betweenness_centrality;
 pub use node2vec::{
     generate_biased_walks_precomp_ref,
     generate_biased_walks_precomp_ref_from_nodes,
