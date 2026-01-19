@@ -25,6 +25,7 @@ pub mod node2vec;
 pub mod pagerank;
 pub mod ppr;
 pub mod random_walk;
+pub mod reachability;
 pub mod topk;
 
 pub use graph::{AdjacencyMatrix, Graph, GraphRef, WeightedGraph, WeightedGraphRef};
@@ -39,8 +40,9 @@ pub use node2vec::{
 
 #[cfg(feature = "parallel")]
 pub use node2vec::generate_biased_walks_precomp_ref_parallel_from_nodes;
-pub use pagerank::{pagerank, PageRankConfig};
+pub use pagerank::{pagerank, pagerank_weighted, PageRankConfig};
 pub use ppr::personalized_pagerank;
+pub use reachability::reachability_counts_edges;
 pub use random_walk::{
     generate_biased_walks,
     generate_biased_walks_from_nodes,

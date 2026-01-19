@@ -74,3 +74,18 @@ where
         self.neighbors(petgraph::graph::NodeIndex::new(node)).map(|idx| idx.index()).collect()
     }
 }
+
+#[cfg(feature = "petgraph")]
+impl<N, Ty, Ix> WeightedGraph for petgraph::Graph<N, f64, Ty, Ix>
+where
+    Ty: petgraph::EdgeType,
+    Ix: petgraph::graph::IndexType,
+{
+    fn edge_weight(&self, source: usize, target: usize) -> f64 {
+        let s = petgraph::graph::NodeIndex::new(source);
+        let t = petgraph::graph::NodeIndex::new(target);
+        self.find_edge(s, t)
+            .map(|e| *self.edge_weight(e).unwrap_or(&0.0))
+            .unwrap_or(0.0)
+    }
+}
