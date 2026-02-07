@@ -1,24 +1,12 @@
+use proptest::prelude::*;
 use walk::{
-    generate_biased_walks,
-    generate_biased_walks_precomp_ref,
-    generate_biased_walks_precomp_ref_from_nodes,
-    generate_biased_walks_ref,
-    generate_biased_walks_weighted_plus_ref,
-    generate_biased_walks_weighted_ref,
-    generate_walks,
-    generate_walks_ref,
-    normalize,
-    pagerank,
-    personalized_pagerank,
-    top_k,
-    PageRankConfig,
-    PrecomputedBiasedWalks,
-    WalkConfig,
-    WeightedGraphRef,
-    WeightedNode2VecPlusConfig,
+    generate_biased_walks, generate_biased_walks_precomp_ref,
+    generate_biased_walks_precomp_ref_from_nodes, generate_biased_walks_ref,
+    generate_biased_walks_weighted_plus_ref, generate_biased_walks_weighted_ref, generate_walks,
+    generate_walks_ref, normalize, pagerank, personalized_pagerank, top_k, PageRankConfig,
+    PrecomputedBiasedWalks, WalkConfig, WeightedGraphRef, WeightedNode2VecPlusConfig,
 };
 use walk::{Graph, GraphRef};
-use proptest::prelude::*;
 
 #[derive(Debug, Clone)]
 struct AdjListGraph {
@@ -67,7 +55,8 @@ impl WeightedAdjListGraph {
             assert_eq!(adj[i].len(), wts[i].len());
 
             // Keep neighbor/weight pairs aligned while sorting by neighbor id.
-            let mut pairs: Vec<(usize, f32)> = adj[i].iter().copied().zip(wts[i].iter().copied()).collect();
+            let mut pairs: Vec<(usize, f32)> =
+                adj[i].iter().copied().zip(wts[i].iter().copied()).collect();
             pairs.sort_by_key(|(n, _)| *n);
             adj[i] = pairs.iter().map(|(n, _)| *n).collect();
             wts[i] = pairs.iter().map(|(_, w)| *w).collect();
@@ -193,7 +182,13 @@ fn reproducible_given_seed() {
 #[test]
 fn isolated_node_walks_have_length_1() {
     let g = AdjListGraph::new(vec![vec![]]);
-    let cfg = WalkConfig { length: 10, walks_per_node: 3, p: 0.5, q: 2.0, seed: 7 };
+    let cfg = WalkConfig {
+        length: 10,
+        walks_per_node: 3,
+        p: 0.5,
+        q: 2.0,
+        seed: 7,
+    };
 
     let u = generate_walks(&g, cfg);
     let ur = generate_walks_ref(&g, cfg);
@@ -231,7 +226,11 @@ fn topk_and_normalize_basic() {
 fn pagerank_cycle_is_uniform() {
     // 0 -> 1 -> 2 -> 0
     let g = AdjListGraph::new(vec![vec![1], vec![2], vec![0]]);
-    let cfg = PageRankConfig { damping: 0.85, max_iterations: 200, tolerance: 1e-12 };
+    let cfg = PageRankConfig {
+        damping: 0.85,
+        max_iterations: 200,
+        tolerance: 1e-12,
+    };
     let pr = pagerank(&g, cfg);
     assert_eq!(pr.len(), 3);
     let s: f64 = pr.iter().sum();
@@ -253,7 +252,11 @@ fn pagerank_empty_graph_is_empty() {
 fn pagerank_symmetric_with_dangling_node() {
     // 0 <-> 1, and 2 is dangling
     let g = AdjListGraph::new(vec![vec![1], vec![0], vec![]]);
-    let cfg = PageRankConfig { damping: 0.85, max_iterations: 200, tolerance: 1e-12 };
+    let cfg = PageRankConfig {
+        damping: 0.85,
+        max_iterations: 200,
+        tolerance: 1e-12,
+    };
     let pr = pagerank(&g, cfg);
     assert_eq!(pr.len(), 3);
     let s: f64 = pr.iter().sum();
@@ -268,7 +271,11 @@ fn pagerank_symmetric_with_dangling_node() {
 fn personalized_pagerank_respects_personalization() {
     // Line: 0 - 1 - 2 (undirected edges)
     let g = AdjListGraph::new(vec![vec![1], vec![0, 2], vec![1]]);
-    let cfg = PageRankConfig { damping: 0.85, max_iterations: 200, tolerance: 1e-12 };
+    let cfg = PageRankConfig {
+        damping: 0.85,
+        max_iterations: 200,
+        tolerance: 1e-12,
+    };
 
     // Compare to uniform personalization (sum=0 => fallback to uniform).
     let pr_uniform = personalized_pagerank(&g, cfg, &[0.0, 0.0, 0.0]);
@@ -331,7 +338,13 @@ proptest! {
 #[test]
 fn ref_from_nodes_is_reproducible_and_subset_sized() {
     let g = AdjListGraph::new(vec![vec![1], vec![0, 2, 3], vec![1, 3], vec![1, 2]]);
-    let cfg = WalkConfig { length: 6, walks_per_node: 4, p: 0.5, q: 2.0, seed: 123 };
+    let cfg = WalkConfig {
+        length: 6,
+        walks_per_node: 4,
+        p: 0.5,
+        q: 2.0,
+        seed: 123,
+    };
     let starts = [0usize, 2usize];
 
     let w1 = walk::generate_walks_ref_from_nodes(&g, &starts, cfg);
@@ -350,7 +363,13 @@ fn ref_from_nodes_is_reproducible_and_subset_sized() {
 #[test]
 fn graph_from_nodes_is_reproducible_and_subset_sized() {
     let g = AdjListGraph::new(vec![vec![1], vec![0, 2, 3], vec![1, 3], vec![1, 2]]);
-    let cfg = WalkConfig { length: 6, walks_per_node: 4, p: 0.5, q: 2.0, seed: 123 };
+    let cfg = WalkConfig {
+        length: 6,
+        walks_per_node: 4,
+        p: 0.5,
+        q: 2.0,
+        seed: 123,
+    };
     let starts = [0usize, 2usize];
 
     let w1 = walk::generate_walks_from_nodes(&g, &starts, cfg);
@@ -387,7 +406,10 @@ fn precomp_is_reproducible_and_sane() {
     let w1 = generate_biased_walks_precomp_ref(&pre, cfg);
     let w2 = generate_biased_walks_precomp_ref(&pre, cfg);
 
-    assert_eq!(w1, w2, "precomputed walks must be deterministic for same seed");
+    assert_eq!(
+        w1, w2,
+        "precomputed walks must be deterministic for same seed"
+    );
     assert_walks_sane(&w1, Graph::node_count(&g), cfg.length);
 }
 
@@ -400,7 +422,13 @@ fn precomp_from_nodes_is_reproducible_and_subset_sized() {
         vec![1, 2],    // 3
     ]);
 
-    let cfg = WalkConfig { length: 8, walks_per_node: 3, p: 0.5, q: 2.0, seed: 7 };
+    let cfg = WalkConfig {
+        length: 8,
+        walks_per_node: 3,
+        p: 0.5,
+        q: 2.0,
+        seed: 7,
+    };
     let starts = [1usize, 3usize];
 
     let pre = PrecomputedBiasedWalks::new(&g, cfg.p, cfg.q);
@@ -443,7 +471,10 @@ fn node2vec_plus_matches_node2vec_on_unit_weights() {
 
     let w = generate_biased_walks_weighted_ref(&g, cfg);
     let w_plus = generate_biased_walks_weighted_plus_ref(&g, cfg);
-    assert_eq!(w, w_plus, "node2vec+ must match node2vec when weights are all 1");
+    assert_eq!(
+        w, w_plus,
+        "node2vec+ must match node2vec when weights are all 1"
+    );
 }
 
 #[test]
@@ -474,8 +505,7 @@ fn precomp_does_not_panic_on_non_reciprocal_edges() {
 #[test]
 fn parallel_is_thread_count_invariant() {
     use walk::{
-        generate_biased_walks_precomp_ref_parallel_from_nodes,
-        generate_biased_walks_ref_parallel,
+        generate_biased_walks_precomp_ref_parallel_from_nodes, generate_biased_walks_ref_parallel,
         generate_walks_ref_parallel,
     };
 
@@ -494,22 +524,38 @@ fn parallel_is_thread_count_invariant() {
         seed: 999,
     };
 
-    let pool1 = rayon::ThreadPoolBuilder::new().num_threads(1).build().unwrap();
-    let pool4 = rayon::ThreadPoolBuilder::new().num_threads(4).build().unwrap();
+    let pool1 = rayon::ThreadPoolBuilder::new()
+        .num_threads(1)
+        .build()
+        .unwrap();
+    let pool4 = rayon::ThreadPoolBuilder::new()
+        .num_threads(4)
+        .build()
+        .unwrap();
 
     let u1 = pool1.install(|| generate_walks_ref_parallel(&g, cfg));
     let u4 = pool4.install(|| generate_walks_ref_parallel(&g, cfg));
-    assert_eq!(u1, u4, "unbiased parallel output must be thread-count invariant");
+    assert_eq!(
+        u1, u4,
+        "unbiased parallel output must be thread-count invariant"
+    );
 
     let b1 = pool1.install(|| generate_biased_walks_ref_parallel(&g, cfg));
     let b4 = pool4.install(|| generate_biased_walks_ref_parallel(&g, cfg));
-    assert_eq!(b1, b4, "biased parallel output must be thread-count invariant");
+    assert_eq!(
+        b1, b4,
+        "biased parallel output must be thread-count invariant"
+    );
 
     // PreComp variant (delta nodes): should also be thread-count invariant.
     let pre = PrecomputedBiasedWalks::new(&g, cfg.p, cfg.q);
     let starts = [0usize, 2usize];
-    let p1 = pool1.install(|| generate_biased_walks_precomp_ref_parallel_from_nodes(&pre, &starts, cfg));
-    let p4 = pool4.install(|| generate_biased_walks_precomp_ref_parallel_from_nodes(&pre, &starts, cfg));
-    assert_eq!(p1, p4, "precomp biased parallel output must be thread-count invariant");
+    let p1 =
+        pool1.install(|| generate_biased_walks_precomp_ref_parallel_from_nodes(&pre, &starts, cfg));
+    let p4 =
+        pool4.install(|| generate_biased_walks_precomp_ref_parallel_from_nodes(&pre, &starts, cfg));
+    assert_eq!(
+        p1, p4,
+        "precomp biased parallel output must be thread-count invariant"
+    );
 }
-

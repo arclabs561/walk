@@ -16,8 +16,8 @@ use rand::Rng;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 
-use walk::{personalized_pagerank, Graph, PageRankConfig};
 use std::path::Path;
+use walk::{personalized_pagerank, Graph, PageRankConfig};
 
 fn gumbel_topk_sample_with_rng(logits: &[f32], k: usize, rng: &mut impl Rng) -> Vec<usize> {
     if k == 0 || logits.is_empty() {
@@ -210,4 +210,3 @@ fn main() {
         println!("  node {i:4}  score={:.6e}", scores[i]);
     }
 }
-

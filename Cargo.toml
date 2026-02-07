@@ -2,34 +2,28 @@
 name = "walk"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.80"
 authors = ["Arc"]
 license = "MIT OR Apache-2.0"
-description = "Graph random-walk family primitives: PageRank, Personalized PageRank, and random walk generation."
+description = "Compatibility shim: re-exports `graphops` (use `graphops` directly)."
 repository = "https://github.com/arclabs561/walk"
 homepage = "https://github.com/arclabs561/walk"
 documentation = "https://docs.rs/walk"
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"], optional = true }
+graphops = { path = "../graphops", version = "0.1.0", default-features = false }
 rand = "0.9"
 rand_chacha = "0.9"
-rand_distr = "0.5"
 rayon = { version = "1.10", optional = true }
-ordered-float = "4.2"
-thiserror = "2.0"
-petgraph = { version = "0.6", optional = true }
 
 [features]
 default = []
-serde = ["dep:serde"]
-parallel = ["dep:rayon"]
-petgraph = ["dep:petgraph"]
+serde = ["graphops/serde"]
+parallel = ["graphops/parallel", "dep:rayon"]
+petgraph = ["graphops/petgraph"]
 
 [dev-dependencies]
 proptest = "1.9"
-# NOTE: keep this repo standalone-publishable. `workspace = true` would only work
-# inside the super-workspace; it would fail in an isolated GitHub checkout.
 criterion = "0.7"
 stats_alloc = "0.1"
 

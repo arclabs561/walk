@@ -1,15 +1,12 @@
 //! Benchmarks for walk generation and sampling strategies.
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use std::hint::black_box;
 use rand::prelude::*;
 use rand::SeedableRng;
+use std::hint::black_box;
 use walk::{
-    generate_biased_walks_precomp_ref,
-    generate_biased_walks_ref,
-    generate_walks_ref,
-    PrecomputedBiasedWalks,
-    WalkConfig,
+    generate_biased_walks_precomp_ref, generate_biased_walks_ref, generate_walks_ref,
+    PrecomputedBiasedWalks, WalkConfig,
 };
 use walk::{Graph, GraphRef};
 
@@ -59,7 +56,7 @@ impl AdjListGraph {
         for v in init..n {
             let mut chosen: Vec<usize> = Vec::with_capacity(m);
             while chosen.len() < m {
-                let u = targets[rng.gen_range(0..targets.len())];
+                let u = targets[rng.random_range(0..targets.len())];
                 if u != v && !chosen.contains(&u) {
                     chosen.push(u);
                 }
@@ -95,7 +92,7 @@ impl AdjListGraph {
             for j in (i + 1)..n {
                 let bj = (j / bsz).min(blocks - 1);
                 let p = if bi == bj { p_in } else { p_out };
-                if rng.gen::<f64>() < p {
+                if rng.random::<f64>() < p {
                     adj[i].push(j);
                     adj[j].push(i);
                 }
@@ -151,28 +148,41 @@ fn bench_walk_generation(c: &mut Criterion) {
         };
 
         for (name, g) in graphs {
-            group.bench_with_input(BenchmarkId::new(format!("{name}/unbiased_ref"), n), &n, |b, _| {
-                b.iter(|| {
-                    let walks = generate_walks_ref(black_box(&g), black_box(cfg));
-                    black_box(walks);
-                })
-            });
+            group.bench_with_input(
+                BenchmarkId::new(format!("{name}/unbiased_ref"), n),
+                &n,
+                |b, _| {
+                    b.iter(|| {
+                        let walks = generate_walks_ref(black_box(&g), black_box(cfg));
+                        black_box(walks);
+                    })
+                },
+            );
 
-            group.bench_with_input(BenchmarkId::new(format!("{name}/biased_ref_otf"), n), &n, |b, _| {
-                b.iter(|| {
-                    let walks = generate_biased_walks_ref(black_box(&g), black_box(cfg));
-                    black_box(walks);
-                })
-            });
+            group.bench_with_input(
+                BenchmarkId::new(format!("{name}/biased_ref_otf"), n),
+                &n,
+                |b, _| {
+                    b.iter(|| {
+                        let walks = generate_biased_walks_ref(black_box(&g), black_box(cfg));
+                        black_box(walks);
+                    })
+                },
+            );
 
             // PreComp setup cost is separate from walk generation.
             let pre = PrecomputedBiasedWalks::new(&g, cfg.p, cfg.q);
-            group.bench_with_input(BenchmarkId::new(format!("{name}/biased_ref_precomp"), n), &n, |b, _| {
-                b.iter(|| {
-                    let walks = generate_biased_walks_precomp_ref(black_box(&pre), black_box(cfg));
-                    black_box(walks);
-                })
-            });
+            group.bench_with_input(
+                BenchmarkId::new(format!("{name}/biased_ref_precomp"), n),
+                &n,
+                |b, _| {
+                    b.iter(|| {
+                        let walks =
+                            generate_biased_walks_precomp_ref(black_box(&pre), black_box(cfg));
+                        black_box(walks);
+                    })
+                },
+            );
         }
     }
 
@@ -181,4 +191,3 @@ fn bench_walk_generation(c: &mut Criterion) {
 
 criterion_group!(benches, bench_walk_generation);
 criterion_main!(benches);
-

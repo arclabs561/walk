@@ -83,4 +83,3 @@ fn streaming_walks_use_far_fewer_allocations_than_collecting() {
         "expected streaming allocations << collecting allocations (collect={a_collect}, stream={a_stream})"
     );
 }
-
