@@ -1,5 +1,9 @@
 # walk
 
+[![crates.io](https://img.shields.io/crates/v/walk.svg)](https://crates.io/crates/walk)
+[![Documentation](https://docs.rs/walk/badge.svg)](https://docs.rs/walk)
+[![CI](https://github.com/arclabs561/walk/actions/workflows/ci.yml/badge.svg)](https://github.com/arclabs561/walk/actions/workflows/ci.yml)
+
 Graph random-walk primitives:
 
 - Unbiased random walks
@@ -34,4 +38,3 @@ This crate uses reservoir sampling via `sample_start_nodes_reservoir`, which is 
 - Page et al. (1999): PageRank.
 - Grover & Leskovec (2016): Node2Vec.
 - Walker (1974) / Vose (1991): alias method for O(1) categorical sampling.
-
