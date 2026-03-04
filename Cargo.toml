@@ -11,7 +11,7 @@ homepage = "https://github.com/arclabs561/walk"
 documentation = "https://docs.rs/walk"
 
 [dependencies]
-graphops = { path = "../graphops", version = "0.1.0", default-features = false }
+graphops = { version = "0.1.0", default-features = false }
 rand = "0.9"
 rand_chacha = "0.9"
 rayon = { version = "1.10", optional = true }
