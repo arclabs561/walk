@@ -30,3 +30,5 @@ stats_alloc = "0.1"
 [[bench]]
 name = "walk_ops"
 harness = false
+
+[workspace]
