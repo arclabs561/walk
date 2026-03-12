@@ -1,3 +1,4 @@
+#![warn(missing_docs)]
 //! # walk (compatibility shim)
 //!
 //! This crate now re-exports [`graphops`] and exists only for compatibility.
