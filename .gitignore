@@ -1,3 +1,8 @@
 target/
 Cargo.lock
 .DS_Store
+
+# AI editor configs (machine-local)
+.cursor/
+.cursorrules
+.cursorignore
