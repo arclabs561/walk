@@ -4,11 +4,7 @@
 [![Documentation](https://docs.rs/walk/badge.svg)](https://docs.rs/walk)
 [![CI](https://github.com/arclabs561/walk/actions/workflows/ci.yml/badge.svg)](https://github.com/arclabs561/walk/actions/workflows/ci.yml)
 
-Graph random-walk primitives:
-
-- Unbiased random walks
-- Node2Vec / Node2Vec-style biased walks (including precomputed alias tables)
-- PageRank and personalized PageRank
+Graph random-walk primitives.
 
 ## Determinism
 
